@@ -3,65 +3,37 @@
 This repo is only a showcase on how to import an external git repo ([source-repo](https://github.com/octaviobr/source-repo)) with it's history into a sub folder (`/infra`)
 
 ### How to Import a Git Repository into a Subfolder of Another Git Repository
-
 To import a Git repository (including its history) into a folder within another Git repository, follow these steps. These steps ensure the full commit history of the imported repository is preserved while embedding it in a subfolder of the target repository.
 
 ---
-
 ### Steps to Import a Git Repository into a Subfolder
-
-1. **Navigate to the target repository**:
+1. **Clone both repositories**:
    ```bash
-   cd /path/to/target-repository
+   git clone git@github.com:OctavioBR/source-repo.git
+   git clone git@github.com:OctavioBR/parent-repo.git
    ```
-
-2. **Add the source repository as a remote**:
+2. **Reorganize the source repository into a subfolder**
    ```bash
-   git remote add source-repo <URL-or-path-to-source-repo>
+   cd source-repo
+   git filter-repo --to-subdirectory-filter infra
    ```
-
-3. **Fetch the source repository**:
+   > **note**: The source repo has to be a **fresh clone** otherwise `filter-repo` will fail with "Refusing to destructively overwrite repo history since this does not look like a fresh clone."<br>
+   > If you don't have `git filter-repo`, you can install it (preferred over git filter-branch for performance and maintenance reasons): `pip install git-filter-repo`
+3. **Add the source repository as a remote in the parent repo and fetch**:
    ```bash
+   cd ../parent-repo
+   git remote add source-repo ../source-repo
    git fetch source-repo
    ```
-
-4. **Create a branch for the source repository**:
+4. **Merge the rewritten branch into the target repository**:
    ```bash
-   git checkout -b source-repo-branch source-repo/main
+   git merge --allow-unrelated-histories source-repo/main
    ```
-   Replace `main` with the default branch of the source repository if it is not `main`.
-
-5. **Reorganize the source repository into a subfolder**:
-   Use `git filter-repo` to rewrite the commit history of the source repository to be inside a subfolder. If you don't have `git filter-repo`, you can install it (preferred over `git filter-branch` for performance and maintenance reasons):
+   > The `--allow-unrelated-histories` flag is necessary because the two repositories do not share a common commit history.
+5. **Clean up (optional)**: Remove the remote reference with:
    ```bash
-   pip install git-filter-repo
+   git remote remove source-repo
    ```
-   Then, run the following:
-   ```bash
-   git filter-repo --to-subdirectory-filter <folder-name>
-   ```
-   Replace `<folder-name>` with the name of the folder where you want to import the source repository.
-
-6. **Switch back to the target repository's branch**:
-   ```bash
-   git checkout main
-   ```
-
-7. **Merge the rewritten branch into the target repository**:
-   ```bash
-   git merge --allow-unrelated-histories source-repo-branch
-   ```
-   The `--allow-unrelated-histories` flag is necessary because the two repositories do not share a common commit history.
-
-8. **Clean up (optional)**:
-   - Remove the temporary branch:
-     ```bash
-     git branch -d source-repo-branch
-     ```
-   - Remove the remote reference:
-     ```bash
-     git remote remove source-repo
-     ```
 
 ---
 
@@ -74,5 +46,4 @@ Check your repository to ensure the files and history are correctly imported:
 ```bash
 git log --oneline --graph --all
 ```
-
-If everything looks good, commit and push your changes to the remote repository.
+If everything looks good, push your changes to the remote repository.
