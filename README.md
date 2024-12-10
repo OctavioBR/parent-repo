@@ -18,7 +18,7 @@ To import a Git repository (including its history) into a folder within another 
    git filter-repo --to-subdirectory-filter infra
    ```
    > **note**: The source repo has to be a **fresh clone** otherwise `filter-repo` will fail with "Refusing to destructively overwrite repo history since this does not look like a fresh clone."<br>
-   > If you don't have `git filter-repo`, you can install it (preferred over git filter-branch for performance and maintenance reasons): `pip install git-filter-repo`
+   > If you don't have `git filter-repo`, you can install it (preferred over [git filter-branch](https://git-scm.com/docs/git-filter-branch) for performance and maintenance reasons): `pip install git-filter-repo`
 3. **Add the source repository as a remote in the parent repo and fetch**:
    ```bash
    cd ../parent-repo
